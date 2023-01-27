@@ -7,51 +7,47 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./IStockToken.sol";
 
+/// @title RUSD
+/// @dev   This is the Reflection stablecoin, similar to other stablecoins such as USDC and BUSD. It is backed 1-to-1 by a combination of US dollars and other stablecoins which in turn are backed by US dollars. RUSD can be used to buy Reflection stock tokens, and, likewise, stock tokens can be redeemed for RUSD. */
 contract RUSD is ERC20, Ownable, ReentrancyGuard {
     address private refWalletAddress;
 
-    /// @dev    Constructor
-    /// @param _refWalletAddress (address)  ref wallet address that will be calling the contracts
-    /// @dev    Access Modifier for only ref wallet calls
+    /// @dev    Access Modifier for only Reflection wallet calls
+    /// @param _refWalletAddress (address)  ref wallet address that will be calling the methods
     modifier onlyRefWalletAddress() {
         require(msg.sender == refWalletAddress, "Only ref wallet");
         _;
     }
 
-    /// @dev
-    /// @param _refWalletAddress (address)  ref wallet address that will be calling the contracts
-
+    /// @dev    Constructor
+    /// @param _refWalletAddress (address)  Reflection wallet address that will be calling the methods
     constructor(address _refWalletAddress) ERC20("Reflection USD Stablecoin", "RUSD") {
         require(_refWalletAddress != address(0), "Zero Ref Address");
         refWalletAddress = _refWalletAddress;
     }
-    
 
-
-    /// @dev    Updating the ref wallet address
+    /// @dev    Update the ref wallet address. This would most likely never be necessary, but it could be convenient to have this if we should ever want to use a different Reflection wallet
     /// @param _refWalletAddress (address)
     function setRefWalletAddress(address _refWalletAddress) external onlyOwner {
         require(_refWalletAddress != address(0), "Zero Ref Address");
         refWalletAddress = _refWalletAddress;
     }
 
-
-    /// @dev    Mint function if there's not enough RUSD supply
+    /// @dev   Mint RUSD into the user's wallet. This is done when they sell a stock token on the Reflection platform
     /// @param to (address)
     /// @param _amount (uint256)
     function mint(address to, uint256 _amount) external onlyRefWalletAddress {
         _mint(to, _amount);
     }
 
-    /// @dev    Burn function to burn out Tokens
+    /// @dev    Burn RUSD out of the user's wallet. This is done when they buy a Stock Token and want to pay with RUSD which they obtained from a previous sale.
     /// @param from (address)
     /// @param _amount (uint256)
     function burn(address from, uint256 _amount) external onlyRefWalletAddress {
         _burn(from, _amount);
     }
 
-
-    /// @dev    function for buying stock token
+    /// @dev    Called when the user buys a stock token on the Reflection platform. This method will (1) mint the stock token into the user's wallet, and (2) either burn RUSD out of their wallet (if they are paying with RUSD), or transfer another stablecoin (such as BUSD) from their wallet to the Reflection wallet (if they are not paying with RUSD). The amount of stock tokens transacted are entered by the user on the platform. The amount of stablecoin is calculated by the platform based on the current market stock price.
     /// @param _userAddress (address)
     /// @param _stableCoinAddress (address)
     /// @param _stockTokenAddress (address)
@@ -78,9 +74,8 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         }
         IStockToken(_stockTokenAddress).mint(_userAddress, _stockTokenAmount);
     }
-
     
-    /// @dev    function for selling stock token
+    /// @dev    Called with the user sells a stock token on the Reflection platform. This method will (1) burn the stock token out of the user's wallet, and (2) either mint RUSD into their wallet, or transfer another stablecoin from the Reflection wallet to the user's wallet. The amount of stock tokens transacted are entered by the user on the platform. The amount of stablecoin is calculated by the platform based on the current market stock price.
     /// @param _userAddress (address)
     /// @param _stableCoinAddress (address)
     /// @param _stockTokenAddress (address)
@@ -108,7 +103,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         IStockToken(_stockTokenAddress).burn(_userAddress, _stockTokenAmount);
     }
 
-    /// @dev    function for redeeming StableCoin to users for RUSD
+    /// @dev    Called when the user elects to redeem their RUSD stablecoin for some other on the Reflection platform. We burn the RUSD out of the user's wallet and transfer the other stablecoin from the Reflection wallet to the user's wallet.
     /// @param _userAddress (address)
     /// @param _stableCoinAddress (address)
     /// @param _amount (uint256)
@@ -129,7 +124,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         );
     }
 
-    /// @dev    function for buying RUSD for StableCoin
+    /// @dev    Function for buying RUSD stablecoin. Currently this method is never called, but we're leaving our options open for the future. This method mints RUSD into the user's wallet and transfers the other stablecoin from their wallet to the Reflection wallet.
     /// @param _userAddress (address)
     /// @param _stableCoinAddress (address)
     /// @param _amount (uint256)
@@ -154,5 +149,4 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     function decimals() public pure override returns (uint8) {
         return 18;
     }
-    
 }
