@@ -33,14 +33,14 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         refWalletAddress = _refWalletAddress;
     }
 
-    /// @dev   Mint RUSD into the user's wallet. This is done when they sell a stock token on the Reflection platform
+    /// @dev   Mint RUSD into the user's wallet. This is done when the user sells a stock token on the Reflection platform.
     /// @param to (address)
     /// @param _amount (uint256)
     function mint(address to, uint256 _amount) external onlyRefWalletAddress {
         _mint(to, _amount);
     }
 
-    /// @dev    Burn RUSD out of the user's wallet. This is done when they buy a Stock Token and want to pay with RUSD which they obtained from a previous sale.
+    /// @dev    Burn RUSD out of the user's wallet. This is done when the user buys a Stock Token and wants to pay with RUSD which they obtained from a previous sale. They must acknowledge a confirmation dialog before this method will be called. 
     /// @param from (address)
     /// @param _amount (uint256)
     function burn(address from, uint256 _amount) external onlyRefWalletAddress {
@@ -107,7 +107,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     /// @param _userAddress (address)
     /// @param _stableCoinAddress (address)
     /// @param _amount (uint256)
-    function redeemFor(
+    function sellRUSD(
         address _userAddress,
         address _stableCoinAddress,
         uint256 _amount
@@ -147,6 +147,6 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     /// @dev    Modifying default decimals to 18
     /// @return  (uint8)
     function decimals() public pure override returns (uint8) {
-        return 18;
+        return 6;
     }
 }
