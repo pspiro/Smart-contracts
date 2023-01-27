@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./IStockToken.sol";
@@ -13,10 +12,21 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
 
     /// @dev    Constructor
     /// @param _refWalletAddress (address)  ref wallet address that will be calling the contracts
+    /// @dev    Access Modifier for only ref wallet calls
+    modifier onlyRefWalletAddress() {
+        require(msg.sender == refWalletAddress, "Only ref wallet");
+        _;
+    }
+
+    /// @dev
+    /// @param _refWalletAddress (address)  ref wallet address that will be calling the contracts
+
     constructor(address _refWalletAddress) ERC20("Reflection USD Stablecoin", "RUSD") {
         require(_refWalletAddress != address(0), "Zero Ref Address");
         refWalletAddress = _refWalletAddress;
     }
+    
+
 
     /// @dev    Updating the ref wallet address
     /// @param _refWalletAddress (address)
@@ -25,11 +35,6 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         refWalletAddress = _refWalletAddress;
     }
 
-    /// @dev    Access Modifier for only ref wallet calls
-    modifier onlyRefWalletAddress() {
-        require(msg.sender == refWalletAddress, "Only ref wallet");
-        _;
-    }
 
     /// @dev    Mint function if there's not enough RUSD supply
     /// @param to (address)
@@ -45,11 +50,6 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         _burn(from, _amount);
     }
 
-    /// @dev    Modifying default decimals to 6
-    /// @return  (uint8)
-    function decimals() public pure override returns (uint8) {
-        return 6;
-    }
 
     /// @dev    function for buying stock token
     /// @param _userAddress (address)
@@ -79,6 +79,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         IStockToken(_stockTokenAddress).mint(_userAddress, _stockTokenAmount);
     }
 
+    
     /// @dev    function for selling stock token
     /// @param _userAddress (address)
     /// @param _stableCoinAddress (address)
@@ -148,7 +149,10 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         _mint(_userAddress, _amount);
     }
 
-    receive() external payable {
-        revert();
+    /// @dev    Modifying default decimals to 18
+    /// @return  (uint8)
+    function decimals() public pure override returns (uint8) {
+        return 18;
     }
+    
 }
