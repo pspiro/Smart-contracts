@@ -3,6 +3,7 @@
 pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./IStockToken.sol";
@@ -10,9 +11,9 @@ import "./IStockToken.sol";
 /// @title StockToken
 /// @dev   This is the Stock Token of the Reflection trading platform. Each StockToken is an ERC20 token and represents one stock on the stock exchange, so there will be many of these StockToken contracts deployed, each with a different namd and symbol
 contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
-    address private refWalletAddress;
-    address private rusdAddress;
-
+    address public refWalletAddress;
+    address public rusdAddress;
+    using SafeERC20 for IERC20;
     /// @dev    Access Modifier for methods that may only be called by the Reflection wallet
     modifier onlyRefWalletAddress() {
         require(msg.sender == refWalletAddress, "Only ref wallet");
@@ -41,13 +42,28 @@ contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
         refWalletAddress = _refWalletAddress;
         rusdAddress = _rusdAddress;
     }
-
+    // events 
+    event SetRefWalletAddress(address RefWalletAddress);
+    event SetRusdAddress(address RusdAddress);
+    event Buy(
+        address UserAddress,
+        uint256 StockTokenAmount,
+        uint256 StableCoinAmount,
+        address StableCoinAddress);
+    event Sell(
+        address UserAddress,
+        uint256 StockTokenAmount,
+        uint256 StableCoinAmount,
+        address StableCoinAddress
+    );
+    
     /// @dev    Update the Reflection wallet address. This would most likely never be necessary, but it could be convenient to have this if we should ever want to use a different Reflection wallet
     /// @dev    Updating the ref wallet address
     /// @param _address (address)
     function setRefWalletAddress(address _address) external onlyOwner {
         require(_address != address(0), "Zero Ref Address");
         refWalletAddress = _address;
+        emit SetRefWalletAddress(_address);
     }
 
     /// @dev    Update the RUSD address. RUSD is the Reflection stablecoin. This method would be called if we ever needed to update the RUSD smart contract.
@@ -55,6 +71,7 @@ contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
     function setRusdAddress(address _address) external onlyOwner {
         require(_address != address(0), "Zero RUSD Address");
         rusdAddress = _address;
+        emit SetRusdAddress(_address);
     }
 
     /// @dev    Mint the StockToken into the user's wallet. This is called when the user buys a stock token on the Reflection platform.
@@ -89,16 +106,15 @@ contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
         uint256 stockTokenAmount,
         uint256 stableCoinAmount,
         address stableCoinAddress
-    ) external nonReentrant  {
-        require(
-            IERC20(stableCoinAddress).transferFrom(
+    ) external nonReentrant onlyRusdAddress {
+        
+            IERC20(stableCoinAddress).safeTransferFrom(
                 userAddress,
                 refWalletAddress,
                 stableCoinAmount
-            ),
-            "Transfer Failed"
-        );
+            );
         _mint(userAddress, stockTokenAmount);
+        emit Buy(userAddress,stockTokenAmount,stableCoinAmount,stableCoinAddress);
     }
 
     /// @dev    Function for selling the stock token. This method is redundant with RUSD.sellStock() and will be removed.
@@ -111,23 +127,17 @@ contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
         uint256 stockTokenAmount,
         uint256 stableCoinAmount,
         address stableCoinAddress
-    ) external nonReentrant  {
+    ) external nonReentrant onlyRusdAddress {
         _burn(userAddress, stockTokenAmount);
 
-        require(
-            IERC20(stableCoinAddress).transferFrom(
+            IERC20(stableCoinAddress).safeTransferFrom(
                 refWalletAddress,
                 userAddress,
                 stableCoinAmount
-            ),
-            "Transfer Failed"
-        );
+            );
+        emit Sell(userAddress,stockTokenAmount,stableCoinAmount, stableCoinAddress);
     }
     
-    /// @dev    Use default of 18 decimals
-    /// @return (uint8) the number of decimal places for the ERC20 token
-    function decimals() public pure override returns (uint8) {
-        return 18;
-    }
+   
 
 }
