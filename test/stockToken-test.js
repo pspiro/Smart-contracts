@@ -18,8 +18,8 @@ contract('stockToken Testing',async()=>{
     it('Update Ref Address',async()=>{
         let stockToken= await stockT.deployed();
         let owner=await stockToken.owner();
-        await stockToken.setRefWalletAddress("0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7",{from:owner});
-        assert(await stockToken.refWalletAddress()== "0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7");
+        await stockToken.setRefWalletAddress("0xbc5f2aB7f250Eec58DB8A9FC88c8815673D6b13c",{from:owner});
+        assert(await stockToken.refWalletAddress()== "0xbc5f2aB7f250Eec58DB8A9FC88c8815673D6b13c");
     })
 
     it('Update RUSD Address',async()=>{
@@ -32,17 +32,17 @@ contract('stockToken Testing',async()=>{
     it('Mint To specific Address by RUSD Wallet',async()=>{
         let stockToken= await stockT.deployed();
         let rusdAddress=await stockToken.rusdAddress();
-        await stockToken.mint("0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7",BigInt(10*10**18),{from:rusdAddress});
-        let balance=await stockToken.balanceOf("0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7");
+        await stockToken.mint("0xbc5f2aB7f250Eec58DB8A9FC88c8815673D6b13c",BigInt(10*10**18),{from:rusdAddress});
+        let balance=await stockToken.balanceOf("0xbc5f2aB7f250Eec58DB8A9FC88c8815673D6b13c");
         assert(balance.toString()==(10*10**18));
     })
     it('burn To specific Address by RUSD Wallet',async()=>{
         let stockToken= await stockT.deployed();
         let rusdAddress=await stockToken.rusdAddress();
-        await stockToken.mint("0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7",BigInt(10*10**18),{from:rusdAddress});
-        let balance=await stockToken.balanceOf("0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7");
-        await stockToken.burn("0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7",balance,{from:rusdAddress});
-        balance=await stockToken.balanceOf("0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7");
+        await stockToken.mint("0xbc5f2aB7f250Eec58DB8A9FC88c8815673D6b13c",BigInt(10*10**18),{from:rusdAddress});
+        let balance=await stockToken.balanceOf("0xbc5f2aB7f250Eec58DB8A9FC88c8815673D6b13c");
+        await stockToken.burn("0xbc5f2aB7f250Eec58DB8A9FC88c8815673D6b13c",balance,{from:rusdAddress});
+        balance=await stockToken.balanceOf("0xbc5f2aB7f250Eec58DB8A9FC88c8815673D6b13c");
         assert(balance.toString()==0);
     })
 })
