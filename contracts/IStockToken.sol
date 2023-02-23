@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.17;
 
 interface IStockToken {
     /// @dev   Function to mint the stock token into the user's wallet; called by the Reflection wallet when the user

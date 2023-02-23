@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -15,20 +15,6 @@ import "./IStockToken.sol";
 contract RUSD is ERC20, Ownable, ReentrancyGuard {
     address public refWalletAddress;
     using SafeERC20 for IERC20;
-
-    /// @dev Access Modifier for methods that may only be called by the Reflection wallet
-    modifier onlyRefWallet() {
-        require(msg.sender == refWalletAddress, "Only ref wallet");
-        _;
-    }
-
-    /// @dev   Constructor
-    /// @param _refWalletAddress Reflection wallet address that is allowed to call the methods with the onlyRefWallet
-    ///        modifier
-    constructor(address _refWalletAddress) ERC20("Reflection USD Stablecoin", "RUSD") {
-        require(_refWalletAddress != address(0), "Zero Ref Address");
-        refWalletAddress = _refWalletAddress;
-    }
 
     // events
     event SetRefWalletAddress(address RefWalletAddress);
@@ -49,6 +35,20 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     event BuyRusd(address UserAddress, address StableCoinAddress, uint256 Amount);
     event SellRusd(address UserAddress, address StableCoinAddress, uint256 Amount);
 
+    /// @dev Access Modifier for methods that may only be called by the Reflection wallet
+    modifier onlyRefWallet() {
+        require(msg.sender == refWalletAddress, "Only ref wallet");
+        _;
+    }
+
+    /// @dev   Constructor
+    /// @param _refWalletAddress Reflection wallet address that is allowed to call the methods with the onlyRefWallet
+    ///        modifier
+    constructor(address _refWalletAddress) ERC20("Reflection USD Stablecoin", "RUSD") {
+        require(_refWalletAddress != address(0), "Zero Ref Address");
+        refWalletAddress = _refWalletAddress;
+    }
+
     /// @dev    Update the ref wallet address. This would most likely never be necessary, but it could be convenient
     ///         to have this if we should ever want to use a different Reflection wallet
     /// @param _refWalletAddress (address)
@@ -56,22 +56,6 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         require(_refWalletAddress != address(0), "Zero Ref Address");
         refWalletAddress = _refWalletAddress;
         emit SetRefWalletAddress(_refWalletAddress);
-    }
-
-    /// @dev   Mint RUSD into the user's wallet. This is done when the user sells a stock token on the Reflection
-    ///        platform. Called only by the Reflection wallet.
-    /// @param to (address)
-    /// @param _amount (uint256)
-    function mint(address to, uint256 _amount) external onlyRefWallet {
-        _mint(to, _amount);
-    }
-
-    /// @dev   Burn RUSD out of the user's wallet. This is done when the user buys a Stock Token and wants to pay
-    ///        with RUSD. Called only by the Reflection wallet.
-    /// @param from (address)
-    /// @param _amount (uint256)
-    function burn(address from, uint256 _amount) external onlyRefWallet {
-        _burn(from, _amount);
     }
 
     /// @dev    Called when the user buys a stock token on the Reflection platform. This method will (1) mint the stock
@@ -100,7 +84,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
             IERC20(_stableCoinAddress).safeTransferFrom(_userAddress, refWalletAddress, _stableCoinAmount);
         }
         IStockToken(_stockTokenAddress).mint(_userAddress, _stockTokenAmount);
-        emit BuyStock(_userAddress,_stableCoinAddress, _stockTokenAddress,_stableCoinAmount, _stockTokenAmount);
+        emit BuyStock(_userAddress, _stableCoinAddress, _stockTokenAddress, _stableCoinAmount, _stockTokenAmount);
     }
 
     /// @dev    Called when the user sells a stock token on the Reflection platform. This method will (1) burn the
@@ -128,7 +112,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
             IERC20(_stableCoinAddress).safeTransferFrom(refWalletAddress, _userAddress, _stableCoinAmount);
         }
         IStockToken(_stockTokenAddress).burn(_userAddress, _stockTokenAmount);
-        emit SellStock(_userAddress,_stableCoinAddress,_stockTokenAddress,_stableCoinAmount,_stockTokenAmount);
+        emit SellStock(_userAddress, _stableCoinAddress, _stockTokenAddress, _stableCoinAmount, _stockTokenAmount);
     }
 
     /// @dev    Function for buying RUSD stablecoin. Currently this method is never called, but we're leaving our
@@ -146,7 +130,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
 
         IERC20(_stableCoinAddress).safeTransferFrom(_userAddress, refWalletAddress, _amount);
         _mint(_userAddress, _amount);
-        emit BuyRusd(_userAddress,_stableCoinAddress,_amount);
+        emit BuyRusd(_userAddress, _stableCoinAddress, _amount);
     }
 
     /// @dev    Called when the user elects to redeem (sell) their RUSD stablecoin for some other stablecoin on the
@@ -164,7 +148,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
 
         _burn(_userAddress, _amount);
         IERC20(_stableCoinAddress).safeTransferFrom(refWalletAddress, _userAddress, _amount);
-        emit SellRusd(_userAddress,_stableCoinAddress,_amount);
+        emit SellRusd(_userAddress, _stableCoinAddress, _amount);
     }
 
     /// @dev    Use 6 decimals, same as the two market-leading stablecoins USDC and USDT
