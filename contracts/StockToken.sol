@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -13,6 +13,9 @@ import "./IStockToken.sol";
 ///        different namd and symbol
 contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
     address public rusdAddress;
+
+    // events
+    event SetRusdAddress(address RusdAddress);
 
     /// @dev Access Modifier for methods that may only be called by the RUSD contract, which is the Reflection
     ///      stablecoin
@@ -29,10 +32,6 @@ contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
         require(_rusdAddress != address(0), "Zero RUSD Address");
         rusdAddress = _rusdAddress;
     }
-
-    // events
-    event SetRusdAddress(address RusdAddress);
-
 
     /// @dev   Update the RUSD address. RUSD is the Reflection stablecoin. This method would be called if we ever
     ///        needed to update the RUSD smart contract.
