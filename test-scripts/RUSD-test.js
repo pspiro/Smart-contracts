@@ -25,16 +25,17 @@ contract('RUSD Testing',async()=>{
     it('Add Admin Address',async()=>{
         let rusdToken= await RUSD.deployed();
         let owner=await rusdToken.owner();
-        await rusdToken.setAdmins("0x25F1d0d1D4cAaeFEE88B8f66E44AB594F515431D",true,{from:owner});
+        await rusdToken.addOrRemoveAdmin("0x25F1d0d1D4cAaeFEE88B8f66E44AB594F515431D",true,{from:owner});
         assert(await rusdToken.admins("0x25F1d0d1D4cAaeFEE88B8f66E44AB594F515431D")== true);
     })
     
     it('remove Admin Address',async()=>{
         let rusdToken= await RUSD.deployed();
         let owner=await rusdToken.owner();
-        await rusdToken.setAdmins("0x25F1d0d1D4cAaeFEE88B8f66E44AB594F515431D",false,{from:owner});
+        await rusdToken.addOrRemoveAdmin("0x25F1d0d1D4cAaeFEE88B8f66E44AB594F515431D",false,{from:owner});
         assert(await rusdToken.admins("0x25F1d0d1D4cAaeFEE88B8f66E44AB594F515431D")== false);
     })
+
 
 })
 
