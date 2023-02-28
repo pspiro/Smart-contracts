@@ -17,7 +17,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // events
-    event AdminChnaged(address AdminAddress,bool IsAdmin);
+    event AdminChanged(address AdminAddress,bool IsAdmin);
     event SetRefWalletAddress(address RefWalletAddress);
     event BuyStock(
         address UserAddress,
@@ -45,11 +45,11 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     /// @dev   Constructor
     /// @param _refWalletAddress Reflection wallet address that is allowed to call the methods with the onlyAdmin
     ///        modifier
-    constructor(address _refWalletAddress, address adminAdd) ERC20("Reflection USD Stablecoin", "RUSD") {
+    constructor(address _refWalletAddress, address admin) ERC20("Reflection USD Stablecoin", "RUSD") {
         require(_refWalletAddress != address(0), "Zero Ref Address");
-        require(adminAdd != address(0), "Zero Admin Address");
+        require(admin != address(0), "Zero Admin Address");
         refWalletAddress = _refWalletAddress;
-        admins[adminAdd]=true;
+        admins[admin]=true;
     }
 
     /// @dev    Add And Remove the new admins. This would most likely never be necessary, but it could be convenient
@@ -58,7 +58,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     function addOrRemoveAdmin(address adminAddress, bool isAdmin) external onlyOwner {
         require(adminAddress != address(0), "Zero admin Address");
         admins[adminAddress]=isAdmin;
-        emit AdminChnaged(adminAddress,isAdmin);
+        emit AdminChanged(adminAddress,isAdmin);
     }
 
     /// @dev    Update the ref wallet address. This would most likely never be necessary, but it could be convenient
