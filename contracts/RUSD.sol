@@ -7,16 +7,17 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./IStockToken.sol";
-
 /// @title RUSD
 /// @dev   This is the Reflection stablecoin, similar to other stablecoins such as USDC and USDT. It is backed 1-to-1
 ///        by a combination of US dollars and other stablecoins which in turn are backed by US dollars. RUSD can be
 ///        used to buy Reflection stock tokens, and, likewise, stock tokens can be redeemed for RUSD. */
 contract RUSD is ERC20, Ownable, ReentrancyGuard {
+    mapping(address=>bool) public admins;
     address public refWalletAddress;
     using SafeERC20 for IERC20;
 
     // events
+    event AdminChanged(address AdminAddress,bool IsAdmin);
     event SetRefWalletAddress(address RefWalletAddress);
     event BuyStock(
         address UserAddress,
@@ -36,17 +37,28 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     event SellRusd(address UserAddress, address StableCoinAddress, uint256 Amount);
 
     /// @dev Access Modifier for methods that may only be called by the Reflection wallet
-    modifier onlyRefWallet() {
-        require(msg.sender == refWalletAddress, "Only ref wallet");
+    modifier onlyAdmin() {
+        require(admins[msg.sender], "Only ref wallet");
         _;
     }
-
+    
     /// @dev   Constructor
-    /// @param _refWalletAddress Reflection wallet address that is allowed to call the methods with the onlyRefWallet
+    /// @param _refWalletAddress Reflection wallet address that is allowed to call the methods with the onlyAdmin
     ///        modifier
-    constructor(address _refWalletAddress) ERC20("Reflection USD Stablecoin", "RUSD") {
+    constructor(address _refWalletAddress, address admin) ERC20("Reflection USD Stablecoin", "RUSD") {
         require(_refWalletAddress != address(0), "Zero Ref Address");
+        require(admin != address(0), "Zero Admin Address");
         refWalletAddress = _refWalletAddress;
+        admins[admin]=true;
+    }
+
+    /// @dev    Add And Remove the new admins. This would most likely never be necessary, but it could be convenient
+    ///         to have this if we should ever want to use a different Reflection wallet
+    /// @param adminAddress (address)
+    function addOrRemoveAdmin(address adminAddress, bool isAdmin) external onlyOwner {
+        require(adminAddress != address(0), "Zero admin Address");
+        admins[adminAddress]=isAdmin;
+        emit AdminChanged(adminAddress,isAdmin);
     }
 
     /// @dev    Update the ref wallet address. This would most likely never be necessary, but it could be convenient
@@ -76,7 +88,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         uint256 _stableCoinAmount,
         uint256 _stockTokenAmount
     )
-        external nonReentrant onlyRefWallet {
+        external nonReentrant onlyAdmin {
    
         if (_stableCoinAddress == address(this)) {
             _burn(_userAddress, _stableCoinAmount);
@@ -104,7 +116,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         uint256 _stableCoinAmount,
         uint256 _stockTokenAmount
     )
-        external nonReentrant onlyRefWallet {
+        external nonReentrant onlyAdmin {
    
         if (_stableCoinAddress == address(this)) {
             _mint(_userAddress, _stableCoinAmount);
@@ -126,7 +138,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         address _stableCoinAddress,
         uint256 _amount
     )
-        external nonReentrant onlyRefWallet {
+        external nonReentrant onlyAdmin {
 
         IERC20(_stableCoinAddress).safeTransferFrom(_userAddress, refWalletAddress, _amount);
         _mint(_userAddress, _amount);
@@ -144,13 +156,12 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         address _stableCoinAddress,
         uint256 _amount
     )
-        external nonReentrant onlyRefWallet {
+        external nonReentrant onlyAdmin {
 
         _burn(_userAddress, _amount);
         IERC20(_stableCoinAddress).safeTransferFrom(refWalletAddress, _userAddress, _amount);
         emit SellRusd(_userAddress, _stableCoinAddress, _amount);
     }
-
     /// @dev    Use 6 decimals, same as the two market-leading stablecoins USDC and USDT
     /// @return (uint8) the number of decimal places for the ERC20 token
     function decimals() public pure override returns (uint8) {
