@@ -3,12 +3,12 @@ const { assert } = require("console");
 const stockT=artifacts.require("StockToken");
 
 contract('stockToken Testing',async()=>{
-    
+
     it('should contract deploy properly',async()=>{
         let stockToken= await stockT.deployed();
         assert(stockToken.address!=='');
     })
-    
+
     it('Check Decimals of Stock Token ',async()=>{
         let stockToken= await stockT.deployed();
         let decimals=await stockToken.decimals();
@@ -27,7 +27,7 @@ contract('stockToken Testing',async()=>{
         let owner=await stockToken.owner();
         await stockToken.setRusdAddress("0x3b07836A939C7135c00FFc3BBD80609f30BC90E3",{from:owner});
         assert(await stockToken.rusdAddress()== "0x3b07836A939C7135c00FFc3BBD80609f30BC90E3");
-    }) 
+    })
 
     it('Mint To specific Address by RUSD Wallet',async()=>{
         let stockToken= await stockT.deployed();
@@ -36,6 +36,7 @@ contract('stockToken Testing',async()=>{
         let balance=await stockToken.balanceOf("0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7");
         assert(balance.toString()==(10*10**18));
     })
+
     it('burn To specific Address by RUSD Wallet',async()=>{
         let stockToken= await stockT.deployed();
         let rusdAddress=await stockToken.rusdAddress();
