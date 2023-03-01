@@ -10,7 +10,7 @@ import "./IStockToken.sol";
 /// @title StockToken
 /// @dev   This is the Stock Token of the Reflection trading platform. Each StockToken is an ERC20 token and represents
 ///        one stock on the stock exchange, so there will be many of these StockToken contracts deployed, each with a
-///        different namd and symbol
+///        different name and symbol
 contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
     address public rusdAddress;
 
@@ -34,7 +34,7 @@ contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
     }
 
     /// @dev   Update the RUSD address. RUSD is the Reflection stablecoin. This method would be called if we ever
-    ///        needed to update the RUSD smart contract.
+    ///        need to update the RUSD smart contract.
     /// @param _address The new contract address of the RUSD contract
     function setRusdAddress(address _address) external onlyOwner {
         require(_address != address(0), "Zero RUSD Address");
@@ -44,7 +44,7 @@ contract StockToken is ERC20, Ownable, ReentrancyGuard, IStockToken {
 
     /// @dev   Mint the StockToken into the user's wallet. This is called when the user buys a stock token on the
     ///        Reflection platform. It is called from (and only from) the RUSD contract.
-    /// @param to The wallet address to which the StockToken will be minted
+    /// @param to The wallet address into which the StockToken will be minted
     /// @param _amount The number of StockTokens which will be minted
     function mint(address to, uint256 _amount) external override onlyRusdAddress {
         _mint(to, _amount);
