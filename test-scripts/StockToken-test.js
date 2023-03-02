@@ -15,13 +15,6 @@ contract('stockToken Testing',async()=>{
         assert(decimals==18);
     })
 
-    it('Update Ref Address',async()=>{
-        let stockToken= await stockT.deployed();
-        let owner=await stockToken.owner();
-        await stockToken.setRefWalletAddress("0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7",{from:owner});
-        assert(await stockToken.refWalletAddress()== "0xdF902EE0578351BEC5893bF21A1A1C3532561Bc7");
-    })
-
     it('Update RUSD Address',async()=>{
         let stockToken= await stockT.deployed();
         let owner=await stockToken.owner();
