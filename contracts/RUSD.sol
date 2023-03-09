@@ -135,17 +135,19 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     ///         stablecoin from their wallet to the RefWallet. Called only by a Reflection Admin wallet.
     /// @param _userAddress The user's wallet address
     /// @param _stableCoinAddress The stablecoin contract address, i.e. RUSD or USDC
+    /// @param _stableCoinAmount The stablecoin contract amount, i.e. RUSD or USDC
     /// @param _amount The amount of RUSD that will be minted into the user's wallet
     function buyRusd(
         address _userAddress,
         address _stableCoinAddress,
+        uint256 _stableCoinAmount,
         uint256 _amount
     )
         external nonReentrant onlyAdmin {
 
-        IERC20(_stableCoinAddress).safeTransferFrom(_userAddress, refWalletAddress, _amount);
+        IERC20(_stableCoinAddress).safeTransferFrom(_userAddress, refWalletAddress, _stableCoinAmount);
         _mint(_userAddress, _amount);
-        emit BuyRusd(_userAddress, _stableCoinAddress, _amount);
+        emit BuyRusd(_userAddress, _stableCoinAddress, _stableCoinAmount);
     }
 
     /// @dev    Called when the user elects to redeem (sell) their RUSD stablecoin for some other stablecoin on the
@@ -153,17 +155,19 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     ///         the RefWallet to the user's wallet. Called only by a Reflection Admin wallet.
     /// @param _userAddress The user's wallet address
     /// @param _stableCoinAddress The stablecoin contract address, i.e. RUSD or USDC
+    /// @param _stableCoinAmount The stablecoin contract amount, i.e. RUSD or USDC
     /// @param _amount (uint256)
     function sellRusd(
         address _userAddress,
         address _stableCoinAddress,
+        uint256 _stableCoinAmount,
         uint256 _amount
     )
         external nonReentrant onlyAdmin {
 
         _burn(_userAddress, _amount);
-        IERC20(_stableCoinAddress).safeTransferFrom(refWalletAddress, _userAddress, _amount);
-        emit SellRusd(_userAddress, _stableCoinAddress, _amount);
+        IERC20(_stableCoinAddress).safeTransferFrom(refWalletAddress, _userAddress, _stableCoinAmount);
+        emit SellRusd(_userAddress, _stableCoinAddress, _stableCoinAmount);
     }
     
     /// @dev    Use 6 decimals, same as the two market-leading stablecoins USDC and USDT

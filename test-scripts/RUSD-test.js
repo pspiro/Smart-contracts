@@ -81,7 +81,7 @@ contract('RUSD Testing',async()=>{
         let RUSDbalance=await rusdToken.balanceOf("0x2c2b2D891A782124f2a21f56adCd5475d8790615");
         console.log("RUSD Balcne before sell",RUSDbalance.toString());
         await BUSD.approve(rusdToken.address,5000,{from:"0x4830C8dAa8adeC73EE6E49f3198EdA8D3e4495Ac"});
-        await rusdToken.sellRusd("0x2c2b2D891A782124f2a21f56adCd5475d8790615",BUSD.address,5000,{from:"0x4830C8dAa8adeC73EE6E49f3198EdA8D3e4495Ac"})
+        await rusdToken.sellRusd("0x2c2b2D891A782124f2a21f56adCd5475d8790615",BUSD.address,5000,5000,{from:"0x4830C8dAa8adeC73EE6E49f3198EdA8D3e4495Ac"})
         RUSDbalance=await rusdToken.balanceOf("0x2c2b2D891A782124f2a21f56adCd5475d8790615");
          balance=await BUSD.balanceOf("0x2c2b2D891A782124f2a21f56adCd5475d8790615");
         console.log("RUSD Balcne after sell",RUSDbalance.toString());
