@@ -134,8 +134,8 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     ///         options open for the future. This method mints RUSD into the user's wallet and transfers the other
     ///         stablecoin from their wallet to the RefWallet. Called only by a Reflection Admin wallet.
     /// @param _userAddress The user's wallet address
-    /// @param _stableCoinAddress The stablecoin contract address, i.e. RUSD or USDC
-    /// @param _stableCoinAmount The stablecoin contract amount, i.e. RUSD or USDC
+    /// @param _stableCoinAddress The stablecoin contract address, i.e. USDC
+    /// @param _stableCoinAmount The amount of stablecoin that will be transferred from user's wallet to RefWallet
     /// @param _amount The amount of RUSD that will be minted into the user's wallet
     function buyRusd(
         address _userAddress,
@@ -154,9 +154,9 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
     ///         Reflection platform. We burn the RUSD out of the user's wallet and transfer the other stablecoin from
     ///         the RefWallet to the user's wallet. Called only by a Reflection Admin wallet.
     /// @param _userAddress The user's wallet address
-    /// @param _stableCoinAddress The stablecoin contract address, i.e. RUSD or USDC
-    /// @param _stableCoinAmount The stablecoin contract amount, i.e. RUSD or USDC
-    /// @param _amount (uint256)
+    /// @param _stableCoinAddress The stablecoin contract address, i.e. USDC
+    /// @param _stableCoinAmount The amount of stablecoin that will be transferred from transferred from RefWallet to user's wallet
+    /// @param _amount The amount of RUSD that will be burned out of the user's wallet
     function sellRusd(
         address _userAddress,
         address _stableCoinAddress,
