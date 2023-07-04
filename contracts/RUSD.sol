@@ -34,6 +34,14 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         uint256 StableCoinAmount,
         uint256 StockTokenAmount
     );
+    event SwapStock(
+        address _userAddress, 
+        address _stockTokenToBurn, 
+        address _stockTokenToMint, 
+        uint256 _stockTokenToBurnAmt, 
+        uint256 _stockTokenToMintAmt
+    );
+    
     event BuyRusd(address UserAddress, address StableCoinAddress, uint256 Amount);
     event SellRusd(address UserAddress, address StableCoinAddress, uint256 Amount);
 
@@ -101,7 +109,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         IStockToken(_stockTokenAddress).mint(_userAddress, _stockTokenAmount);
         emit BuyStock(_userAddress, _stableCoinAddress, _stockTokenAddress, _stableCoinAmount, _stockTokenAmount);
     }
-
+    
     /// @dev    Called when the user sells a stock token on the Reflection platform. This method will (1) burn the
     ///         stock token out of the user's wallet, and (2) either mint RUSD into their wallet, or transfer another
     ///         stablecoin from the RefWallet wallet to the user's wallet. The amount of stock tokens transacted are
@@ -130,6 +138,30 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         emit SellStock(_userAddress, _stableCoinAddress, _stockTokenAddress, _stableCoinAmount, _stockTokenAmount);
     }
 
+    /// @dev    Called when the user swaps one stock token for another. One stock token is burned out of their wallet
+    ///         and another stock token is minted into their wallet. It is equivalent to selling one stock token
+    ///         and then using all of the proceeds to buy another stock token, but since it is a single transaction,
+    ///         the user will pay only one transaction fee, instead of two. It can also be used when a stock split occurs,
+    //          to exchange the old, pre-split stock token for the new, post-split stock token.
+    ///         Called only by a Reflection Admin wallet.
+    /// @param _userAddress The user's wallet address
+    /// @param _stockTokenToBurn The address of the stock token being burned, or "sold"
+    /// @param _stockTokenToMint The address of the stock token being minted, or "bought"
+    /// @param _stockTokenToBurnAmt The amount of stock token to burn
+    /// @param _stockTokenToMintAmt The amount of stock token to mint
+    function swapStock(
+        address _userAddress,
+        address _stockTokenToBurn,
+        address _stockTokenToMint,
+        uint256 _stockTokenToBurnAmt,
+        uint256 _stockTokenToMintAmt
+    )
+    external nonReentrant onlyAdmin {
+        IStockToken(_stockTokenToBurn).burn(_userAddress, _stockTokenToMintAmt);    
+        IStockToken(_stockTokenToMint).mint(_userAddress, _stockTokenToMintAmt);    
+        emit SwapStock(_userAddress, _stockTokenToBurn, _stockTokenToMint, _stockTokenToBurnAmt, _stockTokenToMintAmt);
+    }
+    
     /// @dev    Function for buying RUSD stablecoin. Currently this method is never called, but we're leaving our
     ///         options open for the future. This method mints RUSD into the user's wallet and transfers the other
     ///         stablecoin from their wallet to the RefWallet. Called only by a Reflection Admin wallet.
@@ -169,7 +201,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         IERC20(_stableCoinAddress).safeTransferFrom(refWalletAddress, _userAddress, _stableCoinAmount);
         emit SellRusd(_userAddress, _stableCoinAddress, _stableCoinAmount);
     }
-    
+
     /// @dev    Use 6 decimals, same as the two market-leading stablecoins USDC and USDT
     /// @return (uint8) the number of decimal places for the ERC20 token
     function decimals() public pure override returns (uint8) {
