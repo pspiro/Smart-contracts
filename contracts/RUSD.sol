@@ -157,7 +157,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
         uint256 _stockTokenToMintAmt
     )
     external nonReentrant onlyAdmin {
-        IStockToken(_stockTokenToBurn).burn(_userAddress, _stockTokenToMintAmt);    
+        IStockToken(_stockTokenToBurn).burn(_userAddress, _stockTokenToBurnAmt);    
         IStockToken(_stockTokenToMint).mint(_userAddress, _stockTokenToMintAmt);    
         emit SwapStock(_userAddress, _stockTokenToBurn, _stockTokenToMint, _stockTokenToBurnAmt, _stockTokenToMintAmt);
     }
