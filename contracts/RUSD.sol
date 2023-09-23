@@ -47,7 +47,7 @@ contract RUSD is ERC20, Ownable, ReentrancyGuard {
 
     /// @dev Access Modifier for methods that may only be called by one of the Reflection Admin wallets
     modifier onlyAdmin() {
-        require(admins[msg.sender], "Only ref wallet");
+        require(admins[msg.sender], "Only Admin");
         _;
     }
     
